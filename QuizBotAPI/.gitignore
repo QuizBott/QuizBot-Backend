@@ -33,4 +33,4 @@ build/
 .vscode/
 
 scripts/.venv/
-scripts/.env
+.env

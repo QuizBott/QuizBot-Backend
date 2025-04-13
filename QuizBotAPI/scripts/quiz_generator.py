@@ -1,12 +1,10 @@
-import argparse
 from pydantic import BaseModel, Field, TypeAdapter
 from typing import List
 from google import genai
 import os
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 
-dotenv_path = find_dotenv()
-load_dotenv(dotenv_path)
+load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
@@ -29,24 +27,8 @@ class QuizRecord(BaseModel):
     single_answer_questions: List[SingleAnswerQuestion] = Field(..., description="List of single-answer questions in the quiz")
     multi_answer_questions: List[MultiAnswerQuestion] = Field(..., description="List of multi-answer questions in the quiz")
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--context', type=str, required=True)
-    parser.add_argument('--single', type=int, required=True)
-    parser.add_argument('--multi', type=int, required=True)
-    parser.add_argument('--systemText',type=str,required=True)
-    parser.add_argument('--userText',type=str,required=False)
-
-    args = parser.parse_args()
-
-    system_message = args.systemText
-
-    user_message = args.userText.format(
-        context=args.context,
-        single=args.single,
-        multi=args.multi
-    )
-
+def generate_quiz(context, single, multi, system_text, user_text=None):
+    user_message = user_text.format(context=context, single=single, multi=multi)
     client = genai.Client(api_key=GEMINI_API_KEY)
 
     response = client.models.generate_content(
@@ -54,12 +36,9 @@ def main():
         config={
             'response_mime_type': 'application/json',
             'response_schema': QuizRecord,
-            'system_instruction': system_message
+            'system_instruction': system_text
         },
         contents=user_message,
     )
 
-    print(response.text)
-
-if __name__ == '__main__':
-    main()
+    return QuizRecord.parse_raw(response.text).dict()
