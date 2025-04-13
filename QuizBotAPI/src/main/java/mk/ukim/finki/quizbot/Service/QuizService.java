@@ -1,6 +1,5 @@
 package mk.ukim.finki.quizbot.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.ukim.finki.quizbot.Model.DTO.QuizRecord;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
@@ -11,13 +10,16 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,9 @@ public class QuizService {
     private final ChatModel chatModel;
     private final String systemText;
     private final String userText;
+
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
 
     public QuizService(OllamaChatModel ollamaModel) {
         this.chatModel = ollamaModel;
@@ -97,41 +102,26 @@ public class QuizService {
         try {
             String context = this.getContent(file);
 
-            ProcessBuilder builder = new ProcessBuilder(
-                    "python", "scripts/quiz_generator.py",
-                    "--context", context,
-                    "--single", String.valueOf(single),
-                    "--multi", String.valueOf(multi),
-                    "--systemText", systemText,
-                    "--userText", userText
+            Map<String, Object> requestPayload = Map.of(
+                    "context", context,
+                    "single", single,
+                    "multi", multi,
+                    "systemText", systemText,
+                    "userText", userText
             );
 
-            builder.redirectErrorStream(true);
-            Process process = builder.start();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder output = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.append(line);
-                }
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestPayload, headers);
 
-                int exitCode = process.waitFor();
-                if (exitCode != 0) {
-                    throw new RuntimeException("Python process exited with code " + exitCode);
-                }
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<QuizRecord> response = restTemplate.postForEntity(
+                    "http://localhost:8000/generate", request, QuizRecord.class);
 
-                String jsonOutput = output.toString();
-
-                ObjectMapper mapper = new ObjectMapper();
-                return mapper.readValue(jsonOutput, QuizRecord.class);
-            }
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Process was interrupted", e);
+            return response.getBody();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate quiz via Python process", e);
+            throw new RuntimeException("Failed to call quiz generator API", e);
         }
     }
 }
