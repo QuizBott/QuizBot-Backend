@@ -1,4 +1,4 @@
-package mk.ukim.finki.quizbot.Model.DTO;
+package mk.ukim.finki.quizbot.Model.DTO.Generate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
