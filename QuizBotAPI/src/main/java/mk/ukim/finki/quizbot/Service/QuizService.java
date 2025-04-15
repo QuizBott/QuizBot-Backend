@@ -10,7 +10,6 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,9 +29,6 @@ public class QuizService {
     private final ChatModel chatModel;
     private final String systemText;
     private final String userText;
-
-    @Value("${gemini.api.key}")
-    private String geminiApiKey;
 
     public QuizService(OllamaChatModel ollamaModel) {
         this.chatModel = ollamaModel;
