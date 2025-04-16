@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -247,5 +248,38 @@ public class QuizService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate quiz via Python process", e);
         }
+    }
+
+    public List<Quiz> findAll() {
+        return quizRepository.findAll();
+    }
+
+
+    public void saveQuiz(Quiz quiz) {
+        quizRepository.save(quiz);
+    }
+
+    public List<Quiz> getAllQuizzes() {
+        return quizRepository.findAll();
+    }
+
+    public Optional<Quiz> findById(Long id) {
+        return quizRepository.findById(id);
+    }
+
+
+    public void updateQuiz(Long id, Quiz updatedQuiz) {
+        Quiz existing = quizRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Quiz not found"));
+
+        existing.setName(updatedQuiz.getName());
+        existing.setDescription(updatedQuiz.getDescription());
+        existing.setDuration(updatedQuiz.getDuration());
+        existing.setCategory(updatedQuiz.getCategory());
+        existing.setNumberAttempts(updatedQuiz.getNumberAttempts());
+        existing.setImageUrl(updatedQuiz.getImageUrl());
+        existing.setPromptForModel(updatedQuiz.getPromptForModel());
+
+        quizRepository.save(existing);
     }
 }

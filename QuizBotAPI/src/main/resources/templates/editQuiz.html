@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Quiz</title>
+</head>
+<body>
+<h1>Create a New Quiz</h1>
+
+<form th:action="@{/quizzes/{id}/edit(id=${quiz.id})}" th:object="${quiz}" method="post">
+    <label>Name:</label>
+    <input type="text" th:field="*{name}" required><br><br>
+
+    <label>Description:</label>
+    <textarea th:field="*{description}" required></textarea><br><br>
+
+    <label>Duration (minutes):</label>
+    <input type="number" th:field="*{duration}" required><br><br>
+
+    <label>Category:</label>
+    <input type="text" th:field="*{category}" required><br><br>
+
+    <label>Max Attempts:</label>
+    <input type="number" th:field="*{numberAttempts}" required><br><br>
+
+    <label>Prompt:</label>
+    <input type="text" th:field="*{promptForModel}" required><br><br>
+
+    <label>Image URL:</label>
+    <input type="text" th:field="*{imageUrl}"><br><br>
+
+    <button type="submit">Update Quiz</button>
+</form>
+
+<div th:if="${param.success}">
+    <p>Quiz created successfully!</p>
+</div>
+</body>
+</html>

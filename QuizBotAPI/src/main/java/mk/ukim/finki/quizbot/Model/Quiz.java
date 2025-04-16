@@ -45,9 +45,14 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz")
     private List<QuizAttempt> quizAttempts;
 
+    private String imageUrl;
+
+    private String promptForModel;
+
     public Quiz() {}
 
-    public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts) {
+
+    public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts, String imageUrl, String promptForModel) {
         this.name = name;
         this.description = description;
         this.duration = duration;
@@ -58,6 +63,8 @@ public class Quiz {
         this.tags = tags;
         this.questions = questions;
         this.quizAttempts = quizAttempts;
+        this.imageUrl = imageUrl;
+        this.promptForModel = promptForModel;
     }
 
     public Long getId() {
@@ -102,6 +109,26 @@ public class Quiz {
 
     public List<QuizAttempt> getQuizAttempts() {
         return quizAttempts;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public String getPromptForModel() {
+        return promptForModel;
+    }
+
+    public void setUser(ApplicationUser user) {
+        this.user = user;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void setPromptForModel(String promptForModel) {
+        this.promptForModel = promptForModel;
     }
 
     public void setName(String name) {
