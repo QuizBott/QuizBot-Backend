@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Answer</title>
+</head>
+<body>
+<h1>Edit Answer</h1>
+
+<form th:action="@{/answers/{id}/edit(id=${dto.id})}" method="post" th:object="${dto}">
+    <input type="hidden" th:field="*{id}" />
+    <label>Is Right Answer:</label>
+    <input type="text" th:field="*{answerText}" /><br/>
+    <select th:field="*{isRightAnswer}" required>
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+    </select>
+    <br/>
+
+    <label>Question:</label>
+    <select th:field="*{questionId}" required>
+        <option value="" disabled>Select a question</option>
+        <option th:each="q : ${dto.questions}" th:value="${q.id}" th:text="${q.question}"></option>
+    </select>
+    <br/>
+
+    <button type="submit">Update Answer</button>
+</form>
+
+<a href="/answers/list">Back to List</a>
+</body>
+</html>

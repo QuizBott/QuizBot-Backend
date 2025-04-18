@@ -14,6 +14,7 @@ public class Answer {
     private Long id;
 
     private Boolean isRightAnswer;
+    private String answerText;
 
     @ManyToOne
     private Question question;
@@ -28,7 +29,13 @@ public class Answer {
         this.question = question;
         this.userAnswers = userAnswers;
     }
+    public String getAnswerText() {
+        return answerText;
+    }
 
+    public void setAnswerText(String answerText) {
+        this.answerText = answerText;
+    }
     public Boolean getRightAnswer() {
         return isRightAnswer;
     }

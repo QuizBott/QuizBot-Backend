@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Answer</title>
+</head>
+<body>
+<h1>Create a New Answer</h1>
+
+<form th:action="@{/answers/create}" method="post" th:object="${dto}">
+    <input type="text" th:field="*{answerText}" /> <br/>
+    <label>Is Right Answer:</label>
+    <select th:field="*{isRightAnswer}" required>
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+    </select>
+    <br/>
+
+    <label>Question:</label>
+    <select th:field="*{questionId}" required>
+        <option value="" disabled selected>Select a question</option>
+        <option th:each="q : ${dto.questions}" th:value="${q.id}" th:text="${q.question}"></option>
+    </select>
+    <br/>
+
+    <button type="submit">Create Answer</button>
+</form>
+
+<p th:if="${param.success}">✅ Answer created successfully!</p>
+
+<a href="/answers/list">Back to List</a>
+</body>
+</html>
