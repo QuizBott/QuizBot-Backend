@@ -27,7 +27,7 @@ public class ApplicationUser implements UserDetails {
     @Column(nullable = false)
     private String lastName;
 
-    @Enumerated(EnumType.STRING) // Store enum as a string
+    @Enumerated(EnumType.STRING)
     private UserRoles userRoles;
 
     @Column(nullable = false)
@@ -56,7 +56,7 @@ public class ApplicationUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(() -> "ROLE_" + this.userRoles.name());
     }
 
     @Override

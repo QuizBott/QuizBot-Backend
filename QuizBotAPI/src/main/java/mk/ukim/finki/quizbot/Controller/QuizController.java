@@ -4,6 +4,7 @@ import mk.ukim.finki.quizbot.Model.DTO.QuizRecord;
 import mk.ukim.finki.quizbot.Service.QuizService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,7 @@ public class QuizController {
         this.quizService = quizService;
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/generate")
     public ResponseEntity<QuizRecord> generateQuiz(@RequestParam Integer single, @RequestParam Integer multi, @RequestBody MultipartFile file) {
         try {
@@ -27,6 +29,7 @@ public class QuizController {
         }
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/generate/v2")
     public ResponseEntity<QuizRecord> generateQuizV2(@RequestParam Integer single, @RequestParam Integer multi, @RequestBody MultipartFile file) {
         try {
