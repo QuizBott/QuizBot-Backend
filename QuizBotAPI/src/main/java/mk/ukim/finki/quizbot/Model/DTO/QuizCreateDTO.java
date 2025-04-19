@@ -1,10 +1,9 @@
 package mk.ukim.finki.quizbot.Model.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
 
 import java.util.List;
-@Getter
+
 public record QuizCreateDTO(
         @JsonProperty(required = true, value = "name")
         String name,
@@ -29,7 +28,5 @@ public record QuizCreateDTO(
         Integer multiAnswerQuestions
 
 ) {
-
-
 
 }

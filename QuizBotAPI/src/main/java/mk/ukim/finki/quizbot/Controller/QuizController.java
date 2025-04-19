@@ -1,7 +1,10 @@
 package mk.ukim.finki.quizbot.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
 import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
+import mk.ukim.finki.quizbot.Model.DTO.QuizCreateResponseDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Service.QuizService;
@@ -54,19 +57,24 @@ public class QuizController {
         }
     }
 
-    @PostMapping("/generate/gemini")
-    public ResponseEntity<QuizRecord> generateQuizV2(@RequestPart("quiz") QuizCreateDTO quizCreateDTO, @RequestPart("file") MultipartFile file) {
+    @PostMapping(path = "/generate/gemini", consumes = { "multipart/form-data" })
+    public ResponseEntity<QuizCreateResponseDTO> generateQuizV2(@RequestPart("quiz") String quizCreateDTO, @RequestPart("file") MultipartFile file) {
         try {
-            int single = quizCreateDTO.getSingleAnswerQuestions();
-            int multi = quizCreateDTO.getMultiAnswerQuestions();
+            QuizCreateDTO quizCreate = generateQuizCreateDTO(quizCreateDTO);
+            Integer single = quizCreate.singleAnswerQuestions();
+            Integer multi = quizCreate.multiAnswerQuestions();
             QuizRecord quizRecord = quizService.generateQuizGemini(single, multi, file);
-
-            return ResponseEntity.ok(quizRecord);
+            QuizCreateResponseDTO quizResponse = quizService.createQuizResponse(quizRecord, quizCreate);
+            return ResponseEntity.ok(quizResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
+    private QuizCreateDTO generateQuizCreateDTO(String quizCreateDTO) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(quizCreateDTO, QuizCreateDTO.class);
+    }
 
 
 }

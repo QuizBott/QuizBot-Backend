@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import mk.ukim.finki.quizbot.Model.Answer;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
 import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
+import mk.ukim.finki.quizbot.Model.DTO.QuizCreateResponseDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Model.Question;
 import mk.ukim.finki.quizbot.Model.Quiz;
@@ -34,7 +35,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -89,8 +89,47 @@ public class QuizService {
         quizRepository.deleteById(id);
     }
 
-    public void createQuiz(QuizRecord quizRecord, QuizCreateDTO quizCreateDTO) {
+/*    public void createQuiz(QuizRecord quizRecord, QuizCreateDTO quizCreateDTO) {
+        Quiz quiz = new Quiz();
+        quiz.setName(quizCreateDTO.getName());
+        quiz.setDescription(quizCreateDTO.getDescription());
+        quiz.setDuration(quizCreateDTO.getDuration());
+        quiz.setCategory(quizCreateDTO.getCategory());
+        quiz.setNumberAttempts(quizCreateDTO.getNumberAttempts());
+        quiz.setCreatedAt(Instant.now());
+        // quiz.setUser();
+        quiz.setTags(quizCreateDTO.getTags());
+        quiz.setQuestions(getQuestions(quizRecord.singleAnswerQuestions(), quizRecord.multiAnswerQuestions()));
+    }*/
+
+    public QuizCreateResponseDTO createQuizResponse(QuizRecord quizRecord, QuizCreateDTO quizCreate) {
+        QuizCreateResponseDTO quizResponse = new QuizCreateResponseDTO();
+
+        quizResponse.setName(quizCreate.name());
+        quizResponse.setDescription(quizCreate.description());
+        quizResponse.setDuration(quizCreate.duration());
+        quizResponse.setCategory(quizCreate.category());
+        quizResponse.setNumberAttempts(quizCreate.numberAttempts());
+        quizResponse.setTags(quizCreate.tags());
+        quizResponse.setSingleAnswerQuestions(quizRecord.singleAnswerQuestions());
+        quizResponse.setMultiAnswerQuestions(quizRecord.multiAnswerQuestions());
+
+        return quizResponse;
+
     }
+
+/*    private List<Question> getQuestions (SingleAnswerQuestion[] single, MultiAnswerQuestion[] multi){
+        List<Question> questions = new ArrayList<>();
+
+        for(SingleAnswerQuestion question : single){
+            Question q = new Question();
+            q.setQuestion();
+        }
+
+        for(MultiAnswerQuestion question : multi){
+
+        }
+    }*/
 
     @Transactional
     public Quiz updateQuiz(Long id, QuizUpdateDTO quizDTO) {
@@ -105,11 +144,11 @@ public class QuizService {
             if (quizDTO.tags() != null) {
                 List<Tag> tags = quizDTO.tags().stream()
                         .map(dtoTag -> {
-                                Tag tag = tagRepository.findById(dtoTag.id()).orElseThrow(() -> new RuntimeException("Tag not found with id: " + dtoTag.id()));
-                                if (dtoTag.name() != null && !dtoTag.name().equals(tag.getName())) {
-                                    tag.setName(dtoTag.name());
-                                }
-                                return tag;
+                            Tag tag = tagRepository.findById(dtoTag.id()).orElseThrow(() -> new RuntimeException("Tag not found with id: " + dtoTag.id()));
+                            if (dtoTag.name() != null && !dtoTag.name().equals(tag.getName())) {
+                                tag.setName(dtoTag.name());
+                            }
+                            return tag;
                         }).toList();
                 tagRepository.saveAll(tags); // persist the change
                 quiz.setTags(tags);
@@ -149,7 +188,7 @@ public class QuizService {
                                 change = true;
                             }
 
-                            if(change){
+                            if (change) {
                                 questionRepository.save(question); // persist the change
                             }
                             return question;
@@ -237,10 +276,6 @@ public class QuizService {
                 String jsonOutput = output.toString();
 
                 ObjectMapper mapper = new ObjectMapper();
-                Quiz quiz = new Quiz();
-                QuizRecord qr = mapper.readValue(jsonOutput, QuizRecord.class);
-                quiz.setName(qr.name());
-
 
                 return mapper.readValue(jsonOutput, QuizRecord.class);
             }
