@@ -1,6 +1,7 @@
 package mk.ukim.finki.quizbot.Controller;
 
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
+import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Service.QuizService;
@@ -54,12 +55,18 @@ public class QuizController {
     }
 
     @PostMapping("/generate/gemini")
-    public ResponseEntity<QuizRecord> generateQuizV2(@RequestParam Integer single, @RequestParam Integer multi, @RequestBody MultipartFile file) {
+    public ResponseEntity<QuizRecord> generateQuizV2(@RequestPart("quiz") QuizCreateDTO quizCreateDTO, @RequestPart("file") MultipartFile file) {
         try {
+            int single = quizCreateDTO.getSingleAnswerQuestions();
+            int multi = quizCreateDTO.getMultiAnswerQuestions();
             QuizRecord quizRecord = quizService.generateQuizGemini(single, multi, file);
+
             return ResponseEntity.ok(quizRecord);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
+
 }

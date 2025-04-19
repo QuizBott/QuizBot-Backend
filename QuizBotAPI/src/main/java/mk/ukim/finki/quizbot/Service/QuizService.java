@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import mk.ukim.finki.quizbot.Model.Answer;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
+import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Model.Question;
 import mk.ukim.finki.quizbot.Model.Quiz;
@@ -86,6 +87,9 @@ public class QuizService {
             throw new RuntimeException("Quiz not found with id: " + id);
         }
         quizRepository.deleteById(id);
+    }
+
+    public void createQuiz(QuizRecord quizRecord, QuizCreateDTO quizCreateDTO) {
     }
 
     @Transactional
