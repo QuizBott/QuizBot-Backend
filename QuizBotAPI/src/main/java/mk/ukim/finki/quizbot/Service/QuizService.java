@@ -1,6 +1,5 @@
 package mk.ukim.finki.quizbot.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import mk.ukim.finki.quizbot.Model.Answer;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
@@ -23,10 +22,15 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -40,12 +44,10 @@ import java.util.Map;
 @Service
 public class QuizService {
 
-    // Members
     private final ChatModel chatModel;
     private final String systemText;
     private final String userText;
 
-    // Repo
     private final QuizRepository quizRepository;
     private final TagRepository tagRepository;
     private final QuestionRepository questionRepository;
@@ -213,7 +215,6 @@ public class QuizService {
         return List.of(systemMessage, userMessage);
     }
 
-
     private String getContent(MultipartFile file) {
         try {
             return new String(file.getBytes());
@@ -249,42 +250,26 @@ public class QuizService {
         try {
             String context = this.getContent(file);
 
-            ProcessBuilder builder = new ProcessBuilder(
-                    "python", "scripts/quiz_generator.py",
-                    "--context", context,
-                    "--single", String.valueOf(single),
-                    "--multi", String.valueOf(multi),
-                    "--systemText", systemText,
-                    "--userText", userText
+            Map<String, Object> requestPayload = Map.of(
+                    "context", context,
+                    "single", single,
+                    "multi", multi,
+                    "systemText", systemText,
+                    "userText", userText
             );
 
-            builder.redirectErrorStream(true);
-            Process process = builder.start();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder output = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.append(line);
-                }
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestPayload, headers);
 
-                int exitCode = process.waitFor();
-                if (exitCode != 0) {
-                    throw new RuntimeException("Python process exited with code " + exitCode);
-                }
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<QuizRecord> response = restTemplate.postForEntity(
+                    "http://localhost:8000/generate", request, QuizRecord.class);
 
-                String jsonOutput = output.toString();
-
-                ObjectMapper mapper = new ObjectMapper();
-
-                return mapper.readValue(jsonOutput, QuizRecord.class);
-            }
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Process was interrupted", e);
+            return response.getBody();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate quiz via Python process", e);
+            throw new RuntimeException("Failed to call quiz generator API", e);
         }
     }
 }

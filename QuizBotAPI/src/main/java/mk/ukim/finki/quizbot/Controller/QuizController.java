@@ -11,20 +11,22 @@ import mk.ukim.finki.quizbot.Service.QuizService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("api/quiz")
+@RequestMapping("/quiz")
 public class QuizController {
 
-    // Services
     private final QuizService quizService;
 
     public QuizController(QuizService quizService) {
         this.quizService = quizService;
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
+    @PostMapping("/generate")
     @GetMapping
     public Page<Quiz> getQuizzes(@RequestParam(defaultValue = "1") Integer page,
                                            @RequestParam(defaultValue = "6") Integer size,
@@ -47,6 +49,7 @@ public class QuizController {
         return ResponseEntity.ok(quiz);
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/generate/ollama")
     public ResponseEntity<QuizRecord> generateQuiz(@RequestParam Integer single, @RequestParam Integer multi, @RequestBody MultipartFile file) {
         try {
@@ -57,6 +60,7 @@ public class QuizController {
         }
     }
 
+    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping(path = "/generate/gemini", consumes = { "multipart/form-data" })
     public ResponseEntity<QuizCreateResponseDTO> generateQuizV2(@RequestPart("quiz") String quizCreateDTO, @RequestPart("file") MultipartFile file) {
         try {
