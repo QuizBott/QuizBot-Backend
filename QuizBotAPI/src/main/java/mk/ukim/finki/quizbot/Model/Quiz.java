@@ -1,18 +1,23 @@
 package mk.ukim.finki.quizbot.Model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Data
 @Setter
+@Builder
+@AllArgsConstructor
 public class Quiz {
 
     @Id
@@ -39,13 +44,16 @@ public class Quiz {
     @ManyToMany(mappedBy = "quizzes")
     private List<Tag> tags;
 
-    @OneToMany(mappedBy = "quiz")
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
     @OneToMany(mappedBy = "quiz")
     private List<QuizAttempt> quizAttempts;
 
-    public Quiz() {}
+    public Quiz() {
+        questions = new ArrayList<>();
+        quizAttempts = new ArrayList<>();
+    }
 
     public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts) {
         this.name = name;

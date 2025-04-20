@@ -10,10 +10,10 @@ public record SingleAnswerQuestion(
 
         @JsonProperty(required = true, value = "points")
         @JsonPropertyDescription("The points awarded for answering the question correctly")
-        int points,
+        Double points,
 
         @JsonProperty(required = true, value = "answers")
         @JsonPropertyDescription("Array of answer options for the single-answer question. Exactly one answer should be marked as correct.")
-        Answer[] answers
+        AnswerRecord[] answers
 ) {
 }

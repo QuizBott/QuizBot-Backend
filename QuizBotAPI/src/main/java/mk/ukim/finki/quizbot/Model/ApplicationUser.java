@@ -1,12 +1,14 @@
 package mk.ukim.finki.quizbot.Model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import mk.ukim.finki.quizbot.Model.Enum.UserRoles;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -37,21 +39,12 @@ public class ApplicationUser implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "user")
-    private List<Quiz> quizzes;
+    private List<Quiz> quizzes = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<QuizAttempt> quizAttempts;
+    private List<QuizAttempt> quizAttempts = new ArrayList<>();;
 
-    public ApplicationUser() {}
-
-    public ApplicationUser(String firstName, String lastName, UserRoles userRoles, String email, String password, List<Quiz> quizzes, List<QuizAttempt> quizAttempts) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.userRoles = userRoles;
-        this.email = email;
-        this.password = password;
-        this.quizzes = quizzes;
-        this.quizAttempts = quizAttempts;
+    public ApplicationUser() {
     }
 
     @Override
@@ -88,4 +81,5 @@ public class ApplicationUser implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

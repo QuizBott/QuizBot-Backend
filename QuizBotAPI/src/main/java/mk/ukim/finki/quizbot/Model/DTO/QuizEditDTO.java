@@ -1,15 +1,17 @@
 package mk.ukim.finki.quizbot.Model.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Getter;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.MultiAnswerQuestion;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.SingleAnswerQuestion;
 
 import java.util.List;
 
 
-@Setter
-public class QuizCreateResponseDTO {
+@Builder
+@Getter
+public class QuizEditDTO {
     @JsonProperty(required = true, value = "name")
     String name;
 

@@ -10,10 +10,10 @@ public record MultiAnswerQuestion(
 
         @JsonProperty(required = true, value = "points")
         @JsonPropertyDescription("The points awarded for answering the question correctly")
-        int points,
+        Double points,
 
         @JsonProperty(required = true, value = "answers")
         @JsonPropertyDescription("Array of answer options for the multi-answer question. More than one answer can be correct.")
-        Answer[] answers
+        AnswerRecord[] answers
 ) {
 }

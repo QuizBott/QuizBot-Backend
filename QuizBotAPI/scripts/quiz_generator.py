@@ -8,22 +8,21 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
-class Answer(BaseModel):
+class AnswerRecord(BaseModel):
     answer: str = Field(..., description="The text of the answer option")
     is_correct: bool = Field(..., description="Indicates whether this answer is correct")
 
 class SingleAnswerQuestion(BaseModel):
     single_answer_question: str = Field(..., description="The text of the single-answer question")
-    points: int = Field(..., description="Points awarded for answering the question correctly")
-    answers: List[Answer] = Field(..., description="List of answer options for the single-answer question")
+    points: float = Field(..., description="Points awarded for answering the question correctly")
+    answers: List[AnswerRecord] = Field(..., description="List of answer options for the single-answer question")
 
 class MultiAnswerQuestion(BaseModel):
     multi_answer_question: str = Field(..., description="The text of the multi-answer question")
-    points: int = Field(..., description="Points awarded for answering the question correctly")
-    answers: List[Answer] = Field(..., description="List of answer options for the multi-answer question")
+    points: float = Field(..., description="Points awarded for answering the question correctly")
+    answers: List[AnswerRecord] = Field(..., description="List of answer options for the multi-answer question")
 
 class QuizRecord(BaseModel):
-    quiz_name: str = Field(..., description="The name or title of the quiz")
     single_answer_questions: List[SingleAnswerQuestion] = Field(..., description="List of single-answer questions in the quiz")
     multi_answer_questions: List[MultiAnswerQuestion] = Field(..., description="List of multi-answer questions in the quiz")
 

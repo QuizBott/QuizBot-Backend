@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,7 +22,7 @@ public class QuizAttempt {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "quizAttempt")
+    @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnswer> userAnswers;
 
     @ManyToOne
@@ -30,7 +31,9 @@ public class QuizAttempt {
     @ManyToOne
     private Quiz quiz;
 
-    public QuizAttempt(){}
+    public QuizAttempt(){
+        userAnswers = new ArrayList<>();
+    }
 
     public QuizAttempt(Double points, Instant createdAt, List<UserAnswer> userAnswers, ApplicationUser user, Quiz quiz) {
         this.points = points;

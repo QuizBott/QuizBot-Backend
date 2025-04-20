@@ -1,18 +1,14 @@
 package mk.ukim.finki.quizbot.Service;
 
 import jakarta.transaction.Transactional;
-import mk.ukim.finki.quizbot.Model.Answer;
+import mk.ukim.finki.quizbot.Mapper.QuizMapper;
+import mk.ukim.finki.quizbot.Model.*;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
 import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizCreateResponseDTO;
+import mk.ukim.finki.quizbot.Model.DTO.QuizDTO;
+import mk.ukim.finki.quizbot.Model.DTO.QuizEditDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
-import mk.ukim.finki.quizbot.Model.Question;
-import mk.ukim.finki.quizbot.Model.Quiz;
-import mk.ukim.finki.quizbot.Model.Tag;
-import mk.ukim.finki.quizbot.Repository.AnswerRepository;
-import mk.ukim.finki.quizbot.Repository.QuestionRepository;
-import mk.ukim.finki.quizbot.Repository.QuizRepository;
-import mk.ukim.finki.quizbot.Repository.TagRepository;
+import mk.ukim.finki.quizbot.Repository.*;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -22,21 +18,18 @@ import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaOptions;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -48,18 +41,30 @@ public class QuizService {
     private final String systemText;
     private final String userText;
 
+    private final UserContextService userContextService;
+    private final QuestionService questionService;
+    private final TagService tagService;
+
     private final QuizRepository quizRepository;
     private final TagRepository tagRepository;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
+    private final UserRepository userRepository;
+
+    private final QuizMapper quizMapper;
 
 
-    public QuizService(OllamaChatModel ollamaModel, QuizRepository quizRepository, TagRepository tagRepository, QuestionRepository questionRepository, AnswerRepository answerRepository) {
+    public QuizService(OllamaChatModel ollamaModel, UserContextService userContextService, QuestionService questionService, TagService tagService, QuizRepository quizRepository, TagRepository tagRepository, QuestionRepository questionRepository, AnswerRepository answerRepository, UserRepository userRepository, QuizMapper quizMapper) {
         this.chatModel = ollamaModel;
+        this.userContextService = userContextService;
+        this.questionService = questionService;
+        this.tagService = tagService;
         this.quizRepository = quizRepository;
         this.tagRepository = tagRepository;
         this.questionRepository = questionRepository;
         this.answerRepository = answerRepository;
+        this.userRepository = userRepository;
+        this.quizMapper = quizMapper;
         this.systemText = """
                 You are a quiz generator. Given a context text, you must generate a quiz consisting of two types of questions:
                 - SingleAnswerQuestions: For each of these, exactly 4 answers must be provided and exactly one of them marked as correct.
@@ -84,54 +89,41 @@ public class QuizService {
         return quizRepository.findByCategoryIgnoreCase(category, pageable);
     }
 
-    public void deleteQuiz(Long id) {
-        if (!quizRepository.existsById(id)) {
-            throw new RuntimeException("Quiz not found with id: " + id);
-        }
-        quizRepository.deleteById(id);
-    }
-
-/*    public void createQuiz(QuizRecord quizRecord, QuizCreateDTO quizCreateDTO) {
-        Quiz quiz = new Quiz();
-        quiz.setName(quizCreateDTO.getName());
-        quiz.setDescription(quizCreateDTO.getDescription());
-        quiz.setDuration(quizCreateDTO.getDuration());
-        quiz.setCategory(quizCreateDTO.getCategory());
-        quiz.setNumberAttempts(quizCreateDTO.getNumberAttempts());
-        quiz.setCreatedAt(Instant.now());
-        // quiz.setUser();
-        quiz.setTags(quizCreateDTO.getTags());
-        quiz.setQuestions(getQuestions(quizRecord.singleAnswerQuestions(), quizRecord.multiAnswerQuestions()));
-    }*/
-
-    public QuizCreateResponseDTO createQuizResponse(QuizRecord quizRecord, QuizCreateDTO quizCreate) {
-        QuizCreateResponseDTO quizResponse = new QuizCreateResponseDTO();
-
-        quizResponse.setName(quizCreate.name());
-        quizResponse.setDescription(quizCreate.description());
-        quizResponse.setDuration(quizCreate.duration());
-        quizResponse.setCategory(quizCreate.category());
-        quizResponse.setNumberAttempts(quizCreate.numberAttempts());
-        quizResponse.setTags(quizCreate.tags());
-        quizResponse.setSingleAnswerQuestions(quizRecord.singleAnswerQuestions());
-        quizResponse.setMultiAnswerQuestions(quizRecord.multiAnswerQuestions());
+    public QuizEditDTO createQuizEditResponse(QuizRecord quizRecord, QuizCreateDTO quizCreate) {
+        QuizEditDTO quizResponse = QuizEditDTO.builder()
+                .name(quizCreate.name())
+                .description(quizCreate.description())
+                .duration(quizCreate.duration())
+                .category(quizCreate.category())
+                .numberAttempts(quizCreate.numberAttempts())
+                .tags(quizCreate.tags())
+                .singleAnswerQuestions(quizRecord.singleAnswerQuestions())
+                .multiAnswerQuestions(quizRecord.multiAnswerQuestions())
+                .build();
 
         return quizResponse;
+    }
+
+    @Transactional
+    public QuizDTO createQuiz(QuizEditDTO quizEditDTO) {
+
+        ApplicationUser user = userContextService.getCurrentUser();
+        Quiz quiz = quizMapper.toQuiz(quizEditDTO);
+        quiz.setUser(user);
+
+        quizRepository.save(quiz);
+
+        List<Tag> tags = tagService.getOrCreateTags(quizEditDTO.getTags(), quiz);
+        quiz.setTags(tags);
+        List<Question> questions = questionService.createQuestion(quizEditDTO.getSingleAnswerQuestions(), quizEditDTO.getMultiAnswerQuestions(), quiz);
+        quiz.setQuestions(questions);
+
+        quizRepository.save(quiz);
+
+        return quizMapper.toQuizDTO(quiz);
 
     }
 
-/*    private List<Question> getQuestions (SingleAnswerQuestion[] single, MultiAnswerQuestion[] multi){
-        List<Question> questions = new ArrayList<>();
-
-        for(SingleAnswerQuestion question : single){
-            Question q = new Question();
-            q.setQuestion();
-        }
-
-        for(MultiAnswerQuestion question : multi){
-
-        }
-    }*/
 
     @Transactional
     public Quiz updateQuiz(Long id, QuizUpdateDTO quizDTO) {
@@ -177,9 +169,9 @@ public class QuizService {
                                 List<Answer> answers = dtoQuestion.answers().stream().map(dtoAnswer -> {
                                     Answer answer = answerRepository.findById(dtoAnswer.id())
                                             .orElseThrow(() -> new RuntimeException("Answer not found with id: " + dtoAnswer.id()));
-                                    if (dtoAnswer.isRightAnswer() != null &&
-                                            !dtoAnswer.isRightAnswer().equals(answer.getRightAnswer())) {
-                                        answer.setRightAnswer(dtoAnswer.isRightAnswer());
+                                    if (dtoAnswer.isCorrect() != null &&
+                                            !dtoAnswer.isCorrect().equals(answer.getIsCorrect())) {
+                                        answer.setIsCorrect(dtoAnswer.isCorrect());
                                     }
                                     return answer;
                                 }).toList();
@@ -201,6 +193,13 @@ public class QuizService {
             // update other fields if needed
             return quizRepository.save(quiz);
         }).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    }
+
+    public void deleteQuiz(Long id) {
+        if (!quizRepository.existsById(id)) {
+            throw new RuntimeException("Quiz not found with id: " + id);
+        }
+        quizRepository.deleteById(id);
     }
 
     private List<Message> createPrompt(Integer single, Integer multi, String context) {

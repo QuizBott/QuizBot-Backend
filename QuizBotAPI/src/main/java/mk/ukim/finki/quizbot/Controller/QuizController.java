@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
 import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizCreateResponseDTO;
+import mk.ukim.finki.quizbot.Model.DTO.QuizDTO;
+import mk.ukim.finki.quizbot.Model.DTO.QuizEditDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Service.QuizService;
@@ -25,21 +26,22 @@ public class QuizController {
         this.quizService = quizService;
     }
 
-    @PreAuthorize("hasRole('TEACHER')")
-    @PostMapping("/generate")
     @GetMapping
     public Page<Quiz> getQuizzes(@RequestParam(defaultValue = "1") Integer page,
-                                           @RequestParam(defaultValue = "6") Integer size,
-                                           @RequestParam String category) {
+                                 @RequestParam(defaultValue = "6") Integer size,
+                                 @RequestParam String category) {
         return quizService.getQuizzes(category, page, size);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
-        quizService.deleteQuiz(id);
-        return ResponseEntity.noContent().build();
+    @PreAuthorize("hasRole('TEACHER')")
+    @PostMapping("/create")
+    public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizEditDTO quizEditDTO) {
+        QuizDTO quiz = quizService.createQuiz(quizEditDTO);
+        return ResponseEntity.ok(quiz);
     }
 
+
+    @PreAuthorize("hasRole('TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<Quiz> updateQuiz(
             @PathVariable Long id,
@@ -47,6 +49,13 @@ public class QuizController {
     ) {
         Quiz quiz = quizService.updateQuiz(id, quizUpdateDTO);
         return ResponseEntity.ok(quiz);
+    }
+
+    @PreAuthorize("hasRole('TEACHER')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
+        quizService.deleteQuiz(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasRole('TEACHER')")
@@ -61,14 +70,16 @@ public class QuizController {
     }
 
     @PreAuthorize("hasRole('TEACHER')")
-    @PostMapping(path = "/generate/gemini", consumes = { "multipart/form-data" })
-    public ResponseEntity<QuizCreateResponseDTO> generateQuizV2(@RequestPart("quiz") String quizCreateDTO, @RequestPart("file") MultipartFile file) {
+    @PostMapping(path = "/generate/gemini", consumes = {"multipart/form-data"})
+    public ResponseEntity<QuizEditDTO> generateQuizV2(@RequestPart("quiz") String quizCreateDTO, @RequestPart("file") MultipartFile file) {
         try {
             QuizCreateDTO quizCreate = generateQuizCreateDTO(quizCreateDTO);
             Integer single = quizCreate.singleAnswerQuestions();
             Integer multi = quizCreate.multiAnswerQuestions();
+
             QuizRecord quizRecord = quizService.generateQuizGemini(single, multi, file);
-            QuizCreateResponseDTO quizResponse = quizService.createQuizResponse(quizRecord, quizCreate);
+            QuizEditDTO quizResponse = quizService.createQuizEditResponse(quizRecord, quizCreate);
+
             return ResponseEntity.ok(quizResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

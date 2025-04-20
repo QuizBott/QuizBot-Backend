@@ -31,6 +31,10 @@ public class AuthenticationService {
     }
 
     public ApplicationUser register(RegisterUserDto input) {
+        if (userRepository.existsByEmail(input.getEmail())) {
+            throw new IllegalArgumentException("A user with this email already exists.");
+        }
+
         ApplicationUser user = new ApplicationUser()
                 .setFirstName(input.getFirstName())
                 .setLastName(input.getLastName())
