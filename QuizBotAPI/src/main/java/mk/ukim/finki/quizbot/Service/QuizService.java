@@ -125,7 +125,7 @@ public class QuizService {
     }
 
 
-    @Transactional
+    /*@Transactional
     public Quiz updateQuiz(Long id, QuizUpdateDTO quizDTO) {
         return quizRepository.findById(id).map(quiz -> {
             quiz.setName(quizDTO.name());
@@ -193,7 +193,7 @@ public class QuizService {
             // update other fields if needed
             return quizRepository.save(quiz);
         }).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-    }
+    }*/
 
     public void deleteQuiz(Long id) {
         if (!quizRepository.existsById(id)) {

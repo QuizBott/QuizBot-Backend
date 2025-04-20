@@ -16,6 +16,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -34,6 +36,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
+                .cors(withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated())
@@ -47,16 +50,16 @@ public class SecurityConfiguration {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET", "POST"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:5173")); // your frontend origin
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", configuration);
-
+        source.registerCorsConfiguration("/**", config);
         return source;
+
     }
 }

@@ -1,9 +1,10 @@
 package mk.ukim.finki.quizbot.Controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import mk.ukim.finki.quizbot.Model.ApplicationUser;
 import mk.ukim.finki.quizbot.Model.DTO.LoginUserDto;
 import mk.ukim.finki.quizbot.Model.DTO.RegisterUserDto;
-import mk.ukim.finki.quizbot.Responses.LoginResponse;
 import mk.ukim.finki.quizbot.Service.AuthenticationService;
 import mk.ukim.finki.quizbot.Service.JwtService;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +33,19 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto, HttpServletResponse response) {
         ApplicationUser authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
 
-        LoginResponse loginResponse = new LoginResponse().setToken(jwtToken).setExpiresIn(jwtService.getExpirationTime());
+        Cookie cookie = new Cookie("jwt", jwtToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) jwtService.getExpirationTime() / 1000);
 
-        return ResponseEntity.ok(loginResponse);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok("Login successful");
     }
 }

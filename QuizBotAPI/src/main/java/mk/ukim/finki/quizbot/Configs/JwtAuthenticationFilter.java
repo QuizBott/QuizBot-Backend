@@ -47,31 +47,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         try {
-            final String jwt = authHeader.substring(7);
-            final String userEmail = jwtService.extractUsername(jwt);
+            String jwt = null;
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                jwt = authHeader.substring(7);
+            }
 
-            if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (jwt == null && request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("jwt".equals(cookie.getName())) {
+                        jwt = cookie.getValue();
+                        break;
+                    }
+                }
+            }
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+            if (jwt != null) {
+                final String userEmail = jwtService.extractUsername(jwt);
 
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+                if (userEmail != null && authentication == null) {
+                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+                    if (jwtService.isTokenValid(jwt, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
             }
 

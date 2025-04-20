@@ -22,10 +22,15 @@ public record QuizCreateDTO(
 
         @JsonProperty(required = true, value = "tags")
         List<TagDTO> tags,
+
         @JsonProperty(required = true, value = "singleAnswerQuestions")
         Integer singleAnswerQuestions,
+
         @JsonProperty(required = true, value = "multiAnswerQuestions")
-        Integer multiAnswerQuestions
+        Integer multiAnswerQuestions,
+
+        @JsonProperty(required = true, value = "promptText")
+        String promptText
 
 ) {
 

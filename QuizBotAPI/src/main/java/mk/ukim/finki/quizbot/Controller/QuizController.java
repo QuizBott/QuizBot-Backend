@@ -41,7 +41,7 @@ public class QuizController {
     }
 
 
-    @PreAuthorize("hasRole('TEACHER')")
+/*    @PreAuthorize("hasRole('TEACHER')")
     @PutMapping("/{id}")
     public ResponseEntity<Quiz> updateQuiz(
             @PathVariable Long id,
@@ -49,7 +49,7 @@ public class QuizController {
     ) {
         Quiz quiz = quizService.updateQuiz(id, quizUpdateDTO);
         return ResponseEntity.ok(quiz);
-    }
+    }*/
 
     @PreAuthorize("hasRole('TEACHER')")
     @DeleteMapping("/{id}")
@@ -71,7 +71,7 @@ public class QuizController {
 
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping(path = "/generate/gemini", consumes = {"multipart/form-data"})
-    public ResponseEntity<QuizEditDTO> generateQuizV2(@RequestPart("quiz") String quizCreateDTO, @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<QuizEditDTO> generateQuizV2(@RequestPart("quiz") String quizCreateDTO, @RequestPart("file") MultipartFile file, @RequestPart("image") MultipartFile image) {
         try {
             QuizCreateDTO quizCreate = generateQuizCreateDTO(quizCreateDTO);
             Integer single = quizCreate.singleAnswerQuestions();
