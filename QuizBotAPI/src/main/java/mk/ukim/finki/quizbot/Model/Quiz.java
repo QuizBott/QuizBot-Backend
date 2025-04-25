@@ -8,9 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -50,12 +48,15 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz")
     private List<QuizAttempt> quizAttempts;
 
+    @Lob
+    private byte[] image;
+
     public Quiz() {
         questions = new ArrayList<>();
         quizAttempts = new ArrayList<>();
     }
 
-    public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts) {
+    public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts, byte[] image) {
         this.name = name;
         this.description = description;
         this.duration = duration;
@@ -66,81 +67,7 @@ public class Quiz {
         this.tags = tags;
         this.questions = questions;
         this.quizAttempts = quizAttempts;
+        this.image = image;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public Integer getNumberAttempts() {
-        return numberAttempts;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public ApplicationUser getUser() {
-        return user;
-    }
-
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public List<Question> getQuestions() {
-        return questions;
-    }
-
-    public List<QuizAttempt> getQuizAttempts() {
-        return quizAttempts;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public void setNumberAttempts(Integer numberAttempts) {
-        this.numberAttempts = numberAttempts;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
-
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
-    }
-
-    public void setQuizAttempts(List<QuizAttempt> quizAttempts) {
-        this.quizAttempts = quizAttempts;
-    }
 }

@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -89,19 +90,26 @@ public class QuizService {
         return quizRepository.findByCategoryIgnoreCase(category, pageable);
     }
 
-    public QuizEditDTO createQuizEditResponse(QuizRecord quizRecord, QuizCreateDTO quizCreate) {
-        QuizEditDTO quizResponse = QuizEditDTO.builder()
-                .name(quizCreate.name())
-                .description(quizCreate.description())
-                .duration(quizCreate.duration())
-                .category(quizCreate.category())
-                .numberAttempts(quizCreate.numberAttempts())
-                .tags(quizCreate.tags())
-                .singleAnswerQuestions(quizRecord.singleAnswerQuestions())
-                .multiAnswerQuestions(quizRecord.multiAnswerQuestions())
-                .build();
+    public QuizEditDTO createQuizEditResponse(QuizRecord quizRecord, QuizCreateDTO quizCreate, MultipartFile image)
+    {
+        try{
+            QuizEditDTO quizResponse = QuizEditDTO.builder()
+                    .name(quizCreate.name())
+                    .description(quizCreate.description())
+                    .duration(quizCreate.duration())
+                    .category(quizCreate.category())
+                    .numberAttempts(quizCreate.numberAttempts())
+                    .tags(quizCreate.tags())
+                    .singleAnswerQuestions(quizRecord.singleAnswerQuestions())
+                    .multiAnswerQuestions(quizRecord.multiAnswerQuestions())
+                    .imageBase64(Base64.getEncoder().encodeToString(image.getBytes()))
+                    .build();
 
-        return quizResponse;
+            return quizResponse;
+        }catch (IOException e){
+            throw new RuntimeException("Failed to convert image to byte array", e);
+        }
+
     }
 
     @Transactional

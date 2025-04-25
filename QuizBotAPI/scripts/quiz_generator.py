@@ -13,12 +13,12 @@ class AnswerRecord(BaseModel):
     is_correct: bool = Field(..., description="Indicates whether this answer is correct")
 
 class SingleAnswerQuestion(BaseModel):
-    single_answer_question: str = Field(..., description="The text of the single-answer question")
+    question: str = Field(..., description="The text of the single-answer question")
     points: float = Field(..., description="Points awarded for answering the question correctly")
     answers: List[AnswerRecord] = Field(..., description="List of answer options for the single-answer question")
 
 class MultiAnswerQuestion(BaseModel):
-    multi_answer_question: str = Field(..., description="The text of the multi-answer question")
+    question: str = Field(..., description="The text of the multi-answer question")
     points: float = Field(..., description="Points awarded for answering the question correctly")
     answers: List[AnswerRecord] = Field(..., description="List of answer options for the multi-answer question")
 

@@ -36,5 +36,8 @@ public class QuizEditDTO {
     @JsonProperty(required = true, value = "multi_answer_questions")
     MultiAnswerQuestion[] multiAnswerQuestions;
 
+    @JsonProperty(required = true, value = "image")
+    String imageBase64;
+
 
 }

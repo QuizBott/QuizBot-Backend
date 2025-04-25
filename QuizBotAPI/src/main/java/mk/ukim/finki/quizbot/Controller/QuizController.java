@@ -6,7 +6,6 @@ import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
 import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizDTO;
 import mk.ukim.finki.quizbot.Model.DTO.QuizEditDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Service.QuizService;
 import org.springframework.data.domain.Page;
@@ -36,8 +35,12 @@ public class QuizController {
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/create")
     public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizEditDTO quizEditDTO) {
-        QuizDTO quiz = quizService.createQuiz(quizEditDTO);
-        return ResponseEntity.ok(quiz);
+        try {
+            QuizDTO quiz = quizService.createQuiz(quizEditDTO);
+            return ResponseEntity.ok(quiz);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 
@@ -78,7 +81,7 @@ public class QuizController {
             Integer multi = quizCreate.multiAnswerQuestions();
 
             QuizRecord quizRecord = quizService.generateQuizGemini(single, multi, file);
-            QuizEditDTO quizResponse = quizService.createQuizEditResponse(quizRecord, quizCreate);
+            QuizEditDTO quizResponse = quizService.createQuizEditResponse(quizRecord, quizCreate, image);
 
             return ResponseEntity.ok(quizResponse);
         } catch (Exception e) {

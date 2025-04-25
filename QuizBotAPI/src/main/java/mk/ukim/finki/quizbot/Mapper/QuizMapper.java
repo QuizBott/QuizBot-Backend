@@ -6,6 +6,8 @@ import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Model.Tag;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
+
 @Component
 public class QuizMapper {
 
@@ -22,6 +24,7 @@ public class QuizMapper {
                 .duration(quiz.getDuration())
                 .category(quiz.getCategory())
                 .numberAttempts(quiz.getNumberAttempts())
+                .image(Base64.getDecoder().decode(quiz.getImageBase64()))
                 .build();
     }
 
@@ -38,7 +41,8 @@ public class QuizMapper {
                         .toList(),
                 quiz.getQuestions().stream()
                         .map(questionMapper::toQuestionDTO)
-                        .toList()
+                        .toList(),
+                Base64.getEncoder().encodeToString(quiz.getImage())
 
         );
     }

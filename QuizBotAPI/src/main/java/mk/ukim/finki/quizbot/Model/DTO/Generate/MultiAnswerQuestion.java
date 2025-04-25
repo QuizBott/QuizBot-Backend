@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 public record MultiAnswerQuestion(
-        @JsonProperty(required = true, value = "multi_answer_question")
+        @JsonProperty(required = true, value = "question")
         @JsonPropertyDescription("The text of the multi-answer question")
         String question,
 
