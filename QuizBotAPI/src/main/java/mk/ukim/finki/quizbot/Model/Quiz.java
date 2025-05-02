@@ -49,6 +49,7 @@ public class Quiz {
     private List<QuizAttempt> quizAttempts;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     private byte[] image;
 
     public Quiz() {

@@ -3,11 +3,8 @@ package mk.ukim.finki.quizbot.Service;
 import jakarta.transaction.Transactional;
 import mk.ukim.finki.quizbot.Mapper.QuizMapper;
 import mk.ukim.finki.quizbot.Model.*;
+import mk.ukim.finki.quizbot.Model.DTO.*;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
-import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizEditDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizUpdateDTO;
 import mk.ukim.finki.quizbot.Repository.*;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
@@ -47,10 +44,6 @@ public class QuizService {
     private final TagService tagService;
 
     private final QuizRepository quizRepository;
-    private final TagRepository tagRepository;
-    private final QuestionRepository questionRepository;
-    private final AnswerRepository answerRepository;
-    private final UserRepository userRepository;
 
     private final QuizMapper quizMapper;
 
@@ -61,10 +54,6 @@ public class QuizService {
         this.questionService = questionService;
         this.tagService = tagService;
         this.quizRepository = quizRepository;
-        this.tagRepository = tagRepository;
-        this.questionRepository = questionRepository;
-        this.answerRepository = answerRepository;
-        this.userRepository = userRepository;
         this.quizMapper = quizMapper;
         this.systemText = """
                 You are a quiz generator. Given a context text, you must generate a quiz consisting of two types of questions:
@@ -113,6 +102,19 @@ public class QuizService {
     }
 
     @Transactional
+    public QuizSimpleDTO getQuizIntro(Long id){
+        Quiz quiz = quizRepository.getReferenceById(id);
+        return quizMapper.toQuizSimpleDTO(quiz);
+    }
+
+    @Transactional
+    public QuizStartedDTO getQuizStarted(Long id){
+        Quiz quiz = quizRepository.getReferenceById(id);
+        return quizMapper.toQuizStartedDTO(quiz);
+    }
+
+
+    @Transactional
     public QuizDTO createQuiz(QuizEditDTO quizEditDTO) {
 
         ApplicationUser user = userContextService.getCurrentUser();
@@ -131,77 +133,6 @@ public class QuizService {
         return quizMapper.toQuizDTO(quiz);
 
     }
-
-
-    /*@Transactional
-    public Quiz updateQuiz(Long id, QuizUpdateDTO quizDTO) {
-        return quizRepository.findById(id).map(quiz -> {
-            quiz.setName(quizDTO.name());
-            quiz.setCategory(quizDTO.category());
-            quiz.setDescription(quizDTO.description());
-            quiz.setDuration(quizDTO.duration());
-            quiz.setNumberAttempts(quizDTO.numberAttempts());
-
-            // Update Tags
-            if (quizDTO.tags() != null) {
-                List<Tag> tags = quizDTO.tags().stream()
-                        .map(dtoTag -> {
-                            Tag tag = tagRepository.findById(dtoTag.id()).orElseThrow(() -> new RuntimeException("Tag not found with id: " + dtoTag.id()));
-                            if (dtoTag.name() != null && !dtoTag.name().equals(tag.getName())) {
-                                tag.setName(dtoTag.name());
-                            }
-                            return tag;
-                        }).toList();
-                tagRepository.saveAll(tags); // persist the change
-                quiz.setTags(tags);
-            }
-
-            // Update Questions
-            if (quizDTO.questions() != null) {
-                List<Question> questions = quizDTO.questions().stream()
-                        .map(dtoQuestion -> {
-                            boolean change = false;
-                            Question question = questionRepository.findById(dtoQuestion.id()).orElseThrow(() -> new RuntimeException("Question not found with id: " + dtoQuestion.id()));
-
-                            if (dtoQuestion.question() != null && !dtoQuestion.question().equals(question.getQuestion())) {
-                                question.setQuestion(dtoQuestion.question());
-                                change = true;
-                            }
-
-                            if (dtoQuestion.points() != null && !dtoQuestion.points().equals(question.getPoints())) {
-                                question.setPoints(dtoQuestion.points());
-                                change = true;
-                            }
-
-                            if (dtoQuestion.answers() != null && !dtoQuestion.answers().isEmpty()) {
-                                List<Answer> answers = dtoQuestion.answers().stream().map(dtoAnswer -> {
-                                    Answer answer = answerRepository.findById(dtoAnswer.id())
-                                            .orElseThrow(() -> new RuntimeException("Answer not found with id: " + dtoAnswer.id()));
-                                    if (dtoAnswer.isCorrect() != null &&
-                                            !dtoAnswer.isCorrect().equals(answer.getIsCorrect())) {
-                                        answer.setIsCorrect(dtoAnswer.isCorrect());
-                                    }
-                                    return answer;
-                                }).toList();
-
-                                // Save all updated answers
-                                answerRepository.saveAll(answers);
-                                question.setAnswers(answers);
-                                change = true;
-                            }
-
-                            if (change) {
-                                questionRepository.save(question); // persist the change
-                            }
-                            return question;
-                        }).toList();
-                quiz.setQuestions(questions);
-            }
-
-            // update other fields if needed
-            return quizRepository.save(quiz);
-        }).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-    }*/
 
     public void deleteQuiz(Long id) {
         if (!quizRepository.existsById(id)) {

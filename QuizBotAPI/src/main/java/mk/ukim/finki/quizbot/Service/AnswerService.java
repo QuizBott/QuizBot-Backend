@@ -22,7 +22,7 @@ public class AnswerService {
         List<Answer> answers = new ArrayList<>();
 
         for (AnswerRecord a : answerRecord) {
-            Answer answer = new Answer(a.isCorrect(), question);
+            Answer answer = new Answer(a.isCorrect(), question, a.answer());
             answers.add(answer);
         }
         answerRepository.saveAll(answers);

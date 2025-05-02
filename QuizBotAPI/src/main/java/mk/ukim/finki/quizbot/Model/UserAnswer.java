@@ -11,8 +11,6 @@ public class UserAnswer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Boolean isSelected;
-
     @ManyToOne
     private Answer answer;
 
@@ -24,8 +22,7 @@ public class UserAnswer {
 
     public UserAnswer(){}
 
-    public UserAnswer(Boolean isSelected, Answer answer, Question question, QuizAttempt quizAttempt) {
-        this.isSelected = isSelected;
+    public UserAnswer(Answer answer, Question question, QuizAttempt quizAttempt) {
         this.answer = answer;
         this.question = question;
         this.quizAttempt = quizAttempt;

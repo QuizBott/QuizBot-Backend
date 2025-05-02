@@ -7,12 +7,9 @@ public record AnswerDTO(
         Long id,
 
         @JsonProperty(required = true, value = "isCorrect")
-        Boolean isCorrect
+        Boolean isCorrect,
 
-//        @JsonProperty(required = true, value = "questionId")
-//        Long questionId
-
-//        @JsonProperty(value = "userAnswersIds")
-//        List<Long> userAnswersIds
+        @JsonProperty(required = true, value = "answer")
+        String answer
 ) {
 }

@@ -3,10 +3,10 @@ package mk.ukim.finki.quizbot.Controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
-import mk.ukim.finki.quizbot.Model.DTO.QuizCreateDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizEditDTO;
+import mk.ukim.finki.quizbot.Model.DTO.*;
 import mk.ukim.finki.quizbot.Model.Quiz;
+import mk.ukim.finki.quizbot.Model.QuizAttempt;
+import mk.ukim.finki.quizbot.Service.QuizAttemptService;
 import mk.ukim.finki.quizbot.Service.QuizService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -20,9 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class QuizController {
 
     private final QuizService quizService;
+    private final QuizAttemptService quizAttemptService;
 
-    public QuizController(QuizService quizService) {
+    public QuizController(QuizService quizService, QuizAttemptService quizAttemptService) {
         this.quizService = quizService;
+        this.quizAttemptService = quizAttemptService;
     }
 
     @GetMapping
@@ -30,6 +32,46 @@ public class QuizController {
                                  @RequestParam(defaultValue = "6") Integer size,
                                  @RequestParam String category) {
         return quizService.getQuizzes(category, page, size);
+    }
+
+    @GetMapping("/{id}/intro")
+    public ResponseEntity<QuizSimpleDTO> getQuizIntro(@PathVariable() Long id) {
+        try{
+            return ResponseEntity.ok(quizService.getQuizIntro(id));
+        }
+         catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<QuizStartedDTO> getQuizStarted(@PathVariable() Long id) {
+        try{
+            return ResponseEntity.ok(quizService.getQuizStarted(id));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/submit")
+    public ResponseEntity<?> submitQuiz(@RequestBody QuizSubmitDTO submission) {
+        try {
+            QuizAttempt quizAttempt =  quizAttemptService.submitQuiz(submission);
+            return ResponseEntity.ok(HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/results")
+    public ResponseEntity<QuizResultDTO> getResults(@PathVariable Long id) {
+        try {
+            QuizResultDTO dto = quizAttemptService.getLatestResult(id);
+            return ResponseEntity.ok(dto);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PreAuthorize("hasRole('TEACHER')")
@@ -42,17 +84,6 @@ public class QuizController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
-/*    @PreAuthorize("hasRole('TEACHER')")
-    @PutMapping("/{id}")
-    public ResponseEntity<Quiz> updateQuiz(
-            @PathVariable Long id,
-            @RequestBody QuizUpdateDTO quizUpdateDTO
-    ) {
-        Quiz quiz = quizService.updateQuiz(id, quizUpdateDTO);
-        return ResponseEntity.ok(quiz);
-    }*/
 
     @PreAuthorize("hasRole('TEACHER')")
     @DeleteMapping("/{id}")

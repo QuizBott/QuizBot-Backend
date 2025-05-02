@@ -17,6 +17,7 @@ public class QuestionMapper {
         return new QuestionDTO(
                 question.getId(),
                 question.getQuestion(),
+                question.getType().toString(),
                 question.getPoints(),
                 question.getAnswers().stream()
                         .map(answerMapper::toAnswerDTO)

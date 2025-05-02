@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import mk.ukim.finki.quizbot.Model.Enum.QuestionTypes;
+import mk.ukim.finki.quizbot.Model.Enum.UserRoles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,9 @@ public class Question {
 
     private Double points;
 
+    @Enumerated(EnumType.STRING)
+    private QuestionTypes type;
+
     @ManyToOne
     private Quiz quiz;
 
@@ -36,9 +41,10 @@ public class Question {
         userAnswers = new ArrayList<>();
     }
 
-    public Question(String question, Double points, Quiz quiz) {
+    public Question(String question, Double points, QuestionTypes type,Quiz quiz) {
         this.question = question;
         this.points = points;
+        this.type = type;
         this.quiz = quiz;
         this.answers = new ArrayList<>();
         this.userAnswers = new ArrayList<>();

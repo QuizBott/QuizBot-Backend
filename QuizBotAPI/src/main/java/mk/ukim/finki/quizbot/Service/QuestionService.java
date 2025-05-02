@@ -2,6 +2,7 @@ package mk.ukim.finki.quizbot.Service;
 
 import mk.ukim.finki.quizbot.Model.DTO.Generate.MultiAnswerQuestion;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.SingleAnswerQuestion;
+import mk.ukim.finki.quizbot.Model.Enum.QuestionTypes;
 import mk.ukim.finki.quizbot.Model.Question;
 import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Repository.QuestionRepository;
@@ -24,13 +25,13 @@ public class QuestionService {
     public List<Question> createQuestion(SingleAnswerQuestion[] single, MultiAnswerQuestion[] multi, Quiz quiz) {
         List<Question> questions = new ArrayList<>();
         for (SingleAnswerQuestion s : single) {
-            Question question = new Question(s.question(), s.points(), quiz);
+            Question question = new Question(s.question(), s.points(), QuestionTypes.SINGLE, quiz);
             question.setAnswers(answerService.createAnswer(s.answers(),question));
             questions.add(question);
         }
 
         for (MultiAnswerQuestion m : multi) {
-            Question question = new Question(m.question(), m.points(), quiz);
+            Question question = new Question(m.question(), m.points(), QuestionTypes.MULTI, quiz);
             question.setAnswers(answerService.createAnswer(m.answers(),question));
             questions.add(question);
         }

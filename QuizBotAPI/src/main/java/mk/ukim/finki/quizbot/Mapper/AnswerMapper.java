@@ -10,7 +10,8 @@ public class AnswerMapper {
     public AnswerDTO toAnswerDTO(Answer answer) {
         return new AnswerDTO(
                 answer.getId(),
-                answer.getIsCorrect()
+                answer.getIsCorrect(),
+                answer.getAnswer()
         );
     }
 }

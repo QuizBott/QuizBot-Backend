@@ -20,6 +20,8 @@ public class Answer {
 
     private Boolean isCorrect;
 
+    private String answer;
+
     @ManyToOne
     private Question question;
 
@@ -30,10 +32,11 @@ public class Answer {
         userAnswers = new ArrayList<>();
     }
 
-    public Answer(Boolean isCorrect, Question question) {
+    public Answer(Boolean isCorrect, Question question, String answer) {
         this.isCorrect = isCorrect;
         this.question = question;
         this.userAnswers = new ArrayList<>();
+        this.answer = answer;
     }
 
 }
