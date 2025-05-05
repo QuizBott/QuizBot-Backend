@@ -106,4 +106,16 @@ public class QuizAttemptService {
 
         return quizAttemptMapper.mapToQuizResultDTO(quizAttempt);
     }
+
+    public Boolean getUserHasAttemptsForQuiz(Long quizId) {
+        ApplicationUser user = userContextService.getCurrentUser();
+        String username = user.getUsername();
+
+        Quiz quiz = quizRepository.findById(quizId).get();
+
+        int quizAttemptsCount = quizAttemptRepository
+                .findByQuizIdAndUserEmail(quizId, username).size();
+
+        return quizAttemptsCount < quiz.getNumberAttempts();
+    }
 }

@@ -7,4 +7,7 @@ import lombok.Setter;
 public class UserDTO {
     @JsonProperty(required = true, value = "username")
     String username;
+
+    @JsonProperty(required = true, value = "role")
+    String role;
 }

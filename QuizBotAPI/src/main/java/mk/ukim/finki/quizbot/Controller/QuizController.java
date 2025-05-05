@@ -79,6 +79,15 @@ public class QuizController {
         }
     }
 
+    @GetMapping("/{id}/attempts")
+    public ResponseEntity<Boolean> getUserHasAttemptsForQuiz(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(quizAttemptService.getUserHasAttemptsForQuiz(id));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/create")
     public ResponseEntity<QuizDTO> createQuiz(@RequestBody QuizEditDTO quizEditDTO) {
