@@ -37,4 +37,11 @@ public class Tag {
         this.quizzes.add(quiz);
     }
 
+    public List<Quiz> getQuizzes() {
+        return quizzes;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

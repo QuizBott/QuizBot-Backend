@@ -3,16 +3,12 @@ package mk.ukim.finki.quizbot.Service;
 import jakarta.transaction.Transactional;
 import mk.ukim.finki.quizbot.Mapper.QuizAttemptMapper;
 import mk.ukim.finki.quizbot.Model.*;
-import mk.ukim.finki.quizbot.Model.DTO.AnswerSubmitDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizResultDTO;
-import mk.ukim.finki.quizbot.Model.DTO.QuizSubmitDTO;
+import mk.ukim.finki.quizbot.Model.DTO.*;
 import mk.ukim.finki.quizbot.Repository.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class QuizAttemptService {
@@ -34,7 +30,7 @@ public class QuizAttemptService {
     }
 
     @Transactional
-    public QuizAttempt submitQuiz(QuizSubmitDTO submission){
+    public QuizAttempt submitQuiz(QuizSubmitDTO submission) {
 
         Quiz quiz = quizRepository.findById(submission.quizId())
                 .orElseThrow(() -> new NoSuchElementException("Quiz not found"));
@@ -75,11 +71,56 @@ public class QuizAttemptService {
         String username = user.getUsername();
 
         QuizAttempt quizAttempt = quizAttemptRepository
-                .findByQuizIdAndUserUsername(quizId, username)
+                .findByQuizIdAndUserEmail(quizId, username)
                 .stream()
                 .max(Comparator.comparing(QuizAttempt::getCreatedAt))
                 .orElseThrow(() -> new NoSuchElementException("No attempt found"));
 
         return quizAttemptMapper.mapToQuizResultDTO(quizAttempt);
     }
+
+
+    public QuizAttemptGETResponseDTO getQuizzesAttempted() {
+        ApplicationUser user = userContextService.getCurrentUser();
+
+        List<QuizAttempt> quizAttempted = quizAttemptRepository.findAllByUserEmail(user.getUsername());
+
+        // Build list of DTOs using stream mapping
+        List<QuizAttemptDTO> quizAttemptDTOList = quizAttempted.stream()
+                .map(quizAttempt -> new QuizAttemptDTO(
+                        quizAttempt.getPoints(),
+                        quizAttempt.getQuiz().getName(),
+                        quizAttempt.getQuiz().getTags().stream()
+                                .map(Tag::getName)
+                                .collect(Collectors.joining(", "))
+                ))
+                .collect(Collectors.toList());
+
+        // Calculate average points
+        double avg = quizAttempted.stream()
+                .mapToDouble(QuizAttempt::getPoints)
+                .average()
+                .orElse(0.0);
+
+        // Find highest attempt
+        Optional<QuizAttempt> highestAttemptOpt = quizAttempted.stream()
+                .max(Comparator.comparingDouble(QuizAttempt::getPoints));
+
+        // Build best attempt DTO if exists, else null
+        QuizAttemptDTO bestAttemptDTO = highestAttemptOpt.map(bestAttempt -> new QuizAttemptDTO(
+                bestAttempt.getPoints(),
+                bestAttempt.getQuiz().getName(),
+                bestAttempt.getQuiz().getTags().stream()
+                        .map(Tag::getName)
+                        .collect(Collectors.joining(", "))
+        )).orElse(null);
+
+        return new QuizAttemptGETResponseDTO(
+                quizAttemptDTOList,
+                quizAttempted.size(),
+                avg,
+                bestAttemptDTO
+        );
+    }
+
 }

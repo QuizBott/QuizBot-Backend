@@ -2,12 +2,14 @@ package mk.ukim.finki.quizbot.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import mk.ukim.finki.quizbot.Mapper.UserMapper;
 import mk.ukim.finki.quizbot.Model.DTO.Generate.QuizRecord;
 import mk.ukim.finki.quizbot.Model.DTO.*;
 import mk.ukim.finki.quizbot.Model.Quiz;
 import mk.ukim.finki.quizbot.Model.QuizAttempt;
 import mk.ukim.finki.quizbot.Service.QuizAttemptService;
 import mk.ukim.finki.quizbot.Service.QuizService;
+import mk.ukim.finki.quizbot.Service.UserContextService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,8 @@ public class QuizController {
     private final QuizService quizService;
     private final QuizAttemptService quizAttemptService;
 
-    public QuizController(QuizService quizService, QuizAttemptService quizAttemptService) {
+
+    public QuizController(QuizService quizService, QuizAttemptService quizAttemptService, UserContextService userContextService, UserMapper userMapper) {
         this.quizService = quizService;
         this.quizAttemptService = quizAttemptService;
     }
@@ -124,6 +127,19 @@ public class QuizController {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(quizCreateDTO, QuizCreateDTO.class);
     }
+
+
+    // Quiz Attempts Part
+    @GetMapping("/{id}/quizAttempted")
+    public ResponseEntity<QuizAttemptGETResponseDTO> getQuizzesAttempted() {
+        try {
+            QuizAttemptGETResponseDTO quizAttemptGETResponseDTO = quizAttemptService.getQuizzesAttempted();
+            return ResponseEntity.ok(quizAttemptGETResponseDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
 
 }
