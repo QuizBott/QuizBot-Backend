@@ -51,6 +51,7 @@ public class QuizMapper {
 
     public QuizSimpleDTO toQuizSimpleDTO(Quiz quiz) {
         return new QuizSimpleDTO(
+                quiz.getId(),
                 quiz.getName(),
                 quiz.getDescription(),
                 quiz.getDuration(),

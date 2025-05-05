@@ -74,9 +74,17 @@ public class QuizService {
                 """;
     }
 
-    public Page<Quiz> getQuizzes(String category, Integer page, Integer size) {
+    @Transactional
+    public Page<QuizSimpleDTO> getAllQuizzes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return quizRepository.findByCategoryIgnoreCase(category, pageable);
+        return quizRepository.findAll(pageable).map(quizMapper::toQuizSimpleDTO);
+    }
+
+    @Transactional
+    public Page<QuizSimpleDTO> getQuizzesByCategory(String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return quizRepository.findByCategoryIgnoreCase(category, pageable)
+                .map(quizMapper::toQuizSimpleDTO);
     }
 
     public QuizEditDTO createQuizEditResponse(QuizRecord quizRecord, QuizCreateDTO quizCreate, MultipartFile image)

@@ -28,10 +28,15 @@ public class QuizController {
     }
 
     @GetMapping
-    public Page<Quiz> getQuizzes(@RequestParam(defaultValue = "1") Integer page,
+    public Page<QuizSimpleDTO> getQuizzes(@RequestParam(defaultValue = "0") Integer page,
                                  @RequestParam(defaultValue = "6") Integer size,
                                  @RequestParam String category) {
-        return quizService.getQuizzes(category, page, size);
+
+        if (category == null || category.isBlank() || category.equalsIgnoreCase("All")) {
+            return quizService.getAllQuizzes(page, size);
+        }
+
+        return quizService.getQuizzesByCategory(category, page, size);
     }
 
     @GetMapping("/{id}/intro")
