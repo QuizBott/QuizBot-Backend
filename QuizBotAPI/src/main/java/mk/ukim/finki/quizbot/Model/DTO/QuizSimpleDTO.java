@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record QuizSimpleDTO(
+        @JsonProperty(required = true, value = "id")
+        Long id,
+
         @JsonProperty(required = true, value = "name")
         String name,
 

@@ -10,6 +10,7 @@ public class UserMapper {
     public UserDTO toUserDTO(ApplicationUser user) {
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername(user.getFirstName() + " " + user.getLastName());
+        userDTO.setRole(String.valueOf(user.getUserRoles()));
         return userDTO;
     }
 }

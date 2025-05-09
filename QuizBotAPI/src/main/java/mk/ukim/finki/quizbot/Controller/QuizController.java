@@ -31,10 +31,15 @@ public class QuizController {
     }
 
     @GetMapping
-    public Page<Quiz> getQuizzes(@RequestParam(defaultValue = "1") Integer page,
+    public Page<QuizSimpleDTO> getQuizzes(@RequestParam(defaultValue = "0") Integer page,
                                  @RequestParam(defaultValue = "6") Integer size,
                                  @RequestParam String category) {
-        return quizService.getQuizzes(category, page, size);
+
+        if (category == null || category.isBlank() || category.equalsIgnoreCase("All")) {
+            return quizService.getAllQuizzes(page, size);
+        }
+
+        return quizService.getQuizzesByCategory(category, page, size);
     }
 
     @GetMapping("/{id}/intro")
@@ -72,6 +77,15 @@ public class QuizController {
         try {
             QuizResultDTO dto = quizAttemptService.getLatestResult(id);
             return ResponseEntity.ok(dto);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/attempts")
+    public ResponseEntity<Boolean> getUserHasAttemptsForQuiz(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(quizAttemptService.getUserHasAttemptsForQuiz(id));
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

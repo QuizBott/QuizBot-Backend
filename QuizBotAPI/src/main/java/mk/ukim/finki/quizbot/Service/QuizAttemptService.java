@@ -47,17 +47,43 @@ public class QuizAttemptService {
             Question question = questionRepository.findById(a.questionId())
                     .orElseThrow(() -> new NoSuchElementException("Question not found"));
 
-            for (Long answerId : a.answerIds()) {
+            Set<Long> submittedAnswerIds = new HashSet<>(a.answerIds());
+
+            List<Answer> allAnswers = answerRepository.findAllByQuestionId(question.getId());
+
+            Set<Long> correctAnswerIds = allAnswers.stream()
+                    .filter(Answer::getIsCorrect)
+                    .map(Answer::getId)
+                    .collect(Collectors.toSet());
+
+            Set<Long> incorrectAnswerIds = allAnswers.stream()
+                    .filter(ans -> !ans.getIsCorrect())
+                    .map(Answer::getId)
+                    .collect(Collectors.toSet());
+
+            for (Long answerId : submittedAnswerIds) {
                 Answer answer = answerRepository.findById(answerId)
                         .orElseThrow(() -> new NoSuchElementException("Answer not found"));
-
-                UserAnswer userAnswer = new UserAnswer(answer, question, quizAttempt);
-                userAnswers.add(userAnswer);
-
-                if (Boolean.TRUE.equals(answer.getIsCorrect())) {
-                    totalPoints += question.getPoints();
-                }
+                userAnswers.add(new UserAnswer(answer, question, quizAttempt));
             }
+
+            long correctSelected = submittedAnswerIds.stream()
+                    .filter(correctAnswerIds::contains)
+                    .count();
+
+            long incorrectSelected = submittedAnswerIds.stream()
+                    .filter(incorrectAnswerIds::contains)
+                    .count();
+
+            double points = 0.0;
+            if (!correctAnswerIds.isEmpty()) {
+                points += question.getPoints() * ((double) correctSelected / correctAnswerIds.size());
+            }
+            if (!allAnswers.isEmpty()) {
+                points -= question.getPoints() * ((double) incorrectSelected / allAnswers.size());
+            }
+
+            totalPoints += points;
         }
 
         quizAttempt.setPoints(totalPoints);
@@ -77,6 +103,18 @@ public class QuizAttemptService {
                 .orElseThrow(() -> new NoSuchElementException("No attempt found"));
 
         return quizAttemptMapper.mapToQuizResultDTO(quizAttempt);
+    }
+
+    public Boolean getUserHasAttemptsForQuiz(Long quizId) {
+        ApplicationUser user = userContextService.getCurrentUser();
+        String username = user.getUsername();
+
+        Quiz quiz = quizRepository.findById(quizId).get();
+
+        int quizAttemptsCount = quizAttemptRepository
+                .findByQuizIdAndUserEmail(quizId, username).size();
+
+        return quizAttemptsCount < quiz.getNumberAttempts();
     }
 
     @Transactional
