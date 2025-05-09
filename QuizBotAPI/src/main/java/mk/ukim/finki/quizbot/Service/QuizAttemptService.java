@@ -79,7 +79,7 @@ public class QuizAttemptService {
         return quizAttemptMapper.mapToQuizResultDTO(quizAttempt);
     }
 
-
+    @Transactional
     public QuizAttemptGETResponseDTO getQuizzesAttempted() {
         ApplicationUser user = userContextService.getCurrentUser();
 
@@ -92,7 +92,8 @@ public class QuizAttemptService {
                         quizAttempt.getQuiz().getName(),
                         quizAttempt.getQuiz().getTags().stream()
                                 .map(Tag::getName)
-                                .collect(Collectors.joining(", "))
+                                .collect(Collectors.joining(", ")),
+                        Base64.getEncoder().encodeToString(quizAttempt.getQuiz().getImage())
                 ))
                 .collect(Collectors.toList());
 
@@ -112,15 +113,15 @@ public class QuizAttemptService {
                 bestAttempt.getQuiz().getName(),
                 bestAttempt.getQuiz().getTags().stream()
                         .map(Tag::getName)
-                        .collect(Collectors.joining(", "))
+                        .collect(Collectors.joining(", ")),
+                Base64.getEncoder().encodeToString(bestAttempt.getQuiz().getImage())
         )).orElse(null);
 
         return new QuizAttemptGETResponseDTO(
                 quizAttemptDTOList,
                 quizAttempted.size(),
                 avg,
-                bestAttemptDTO
-        );
+                bestAttemptDTO);
     }
 
 }

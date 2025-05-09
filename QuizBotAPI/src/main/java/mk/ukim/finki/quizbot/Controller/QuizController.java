@@ -130,7 +130,7 @@ public class QuizController {
 
 
     // Quiz Attempts Part
-    @GetMapping("/{id}/quizAttempted")
+    @GetMapping("/quizAttempted")
     public ResponseEntity<QuizAttemptGETResponseDTO> getQuizzesAttempted() {
         try {
             QuizAttemptGETResponseDTO quizAttemptGETResponseDTO = quizAttemptService.getQuizzesAttempted();
