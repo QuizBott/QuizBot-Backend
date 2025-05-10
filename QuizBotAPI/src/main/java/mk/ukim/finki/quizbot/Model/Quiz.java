@@ -32,6 +32,8 @@ public class Quiz {
 
     private Integer numberAttempts;
 
+    private Double maxPoints;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -57,12 +59,13 @@ public class Quiz {
         quizAttempts = new ArrayList<>();
     }
 
-    public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts, byte[] image) {
+    public Quiz(String name, String description, Integer duration, String category, Integer numberAttempts, Double maxPoints, Instant createdAt, ApplicationUser user, List<Tag> tags, List<Question> questions, List<QuizAttempt> quizAttempts, byte[] image) {
         this.name = name;
         this.description = description;
         this.duration = duration;
         this.category = category;
         this.numberAttempts = numberAttempts;
+        this.maxPoints = maxPoints;
         this.createdAt = createdAt;
         this.user = user;
         this.tags = tags;

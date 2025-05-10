@@ -135,6 +135,7 @@ public class QuizService {
         quiz.setTags(tags);
         List<Question> questions = questionService.createQuestion(quizEditDTO.getSingleAnswerQuestions(), quizEditDTO.getMultiAnswerQuestions(), quiz);
         quiz.setQuestions(questions);
+        quiz.setMaxPoints(questions.stream().map(Question::getPoints).reduce(0.0, Double::sum));
 
         quizRepository.save(quiz);
 

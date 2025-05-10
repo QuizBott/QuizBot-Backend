@@ -123,10 +123,11 @@ public class QuizAttemptService {
 
         List<QuizAttempt> quizAttempted = quizAttemptRepository.findAllByUserEmail(user.getUsername());
 
-        // Build list of DTOs using stream mapping
         List<QuizAttemptDTO> quizAttemptDTOList = quizAttempted.stream()
                 .map(quizAttempt -> new QuizAttemptDTO(
+                        quizAttempt.getQuiz().getId(),
                         quizAttempt.getPoints(),
+                        quizAttempt.getQuiz().getMaxPoints(),
                         quizAttempt.getQuiz().getName(),
                         quizAttempt.getQuiz().getTags().stream()
                                 .map(Tag::getName)
@@ -135,19 +136,23 @@ public class QuizAttemptService {
                 ))
                 .collect(Collectors.toList());
 
-        // Calculate average points
         double avg = quizAttempted.stream()
                 .mapToDouble(QuizAttempt::getPoints)
                 .average()
                 .orElse(0.0);
 
-        // Find highest attempt
+        double maxAvg = quizAttempted.stream()
+                .mapToDouble(q -> q.getQuiz().getMaxPoints())
+                .average()
+                .orElse(0.0);
+
         Optional<QuizAttempt> highestAttemptOpt = quizAttempted.stream()
                 .max(Comparator.comparingDouble(QuizAttempt::getPoints));
 
-        // Build best attempt DTO if exists, else null
         QuizAttemptDTO bestAttemptDTO = highestAttemptOpt.map(bestAttempt -> new QuizAttemptDTO(
+                bestAttempt.getQuiz().getId(),
                 bestAttempt.getPoints(),
+                bestAttempt.getQuiz().getMaxPoints(),
                 bestAttempt.getQuiz().getName(),
                 bestAttempt.getQuiz().getTags().stream()
                         .map(Tag::getName)
@@ -159,6 +164,7 @@ public class QuizAttemptService {
                 quizAttemptDTOList,
                 quizAttempted.size(),
                 avg,
+                maxAvg,
                 bestAttemptDTO);
     }
 

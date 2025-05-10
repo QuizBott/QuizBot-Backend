@@ -57,6 +57,7 @@ public class QuizMapper {
                 quiz.getDuration(),
                 quiz.getCategory(),
                 quiz.getNumberAttempts(),
+                quiz.getMaxPoints(),
                 quiz.getTags().stream()
                         .map(Tag::getName)
                         .toList(),

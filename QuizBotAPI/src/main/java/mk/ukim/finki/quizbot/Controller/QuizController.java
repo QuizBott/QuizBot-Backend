@@ -63,10 +63,10 @@ public class QuizController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<?> submitQuiz(@RequestBody QuizSubmitDTO submission) {
+    public ResponseEntity<Long> submitQuiz(@RequestBody QuizSubmitDTO submission) {
         try {
             QuizAttempt quizAttempt =  quizAttemptService.submitQuiz(submission);
-            return ResponseEntity.ok(HttpStatus.ACCEPTED);
+            return ResponseEntity.ok(quizAttempt.getId());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -153,7 +153,5 @@ public class QuizController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
 
 }

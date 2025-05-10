@@ -8,5 +8,6 @@ public record QuizAttemptGETResponseDTO(
         List<QuizAttemptDTO> quizAttemptDTOList,
         Integer quizzesTaken,
         Double quizzesAvg,
+        Double quizzesMaxAvg,
         QuizAttemptDTO quizBestScore
 ) { }

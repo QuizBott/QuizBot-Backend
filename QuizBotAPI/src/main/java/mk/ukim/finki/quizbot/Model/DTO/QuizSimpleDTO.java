@@ -23,6 +23,9 @@ public record QuizSimpleDTO(
         @JsonProperty(required = true, value = "numberAttempts")
         Integer numberAttempts,
 
+        @JsonProperty(required = true, value = "maxPoints")
+        Double maxPoints,
+
         @JsonProperty(required = true, value = "tags")
         List<String> tags,
 
