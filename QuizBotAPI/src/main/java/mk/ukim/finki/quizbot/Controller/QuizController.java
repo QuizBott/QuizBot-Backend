@@ -143,12 +143,21 @@ public class QuizController {
     }
 
 
-    // Quiz Attempts Part
     @GetMapping("/quizAttempted")
     public ResponseEntity<QuizAttemptGETResponseDTO> getQuizzesAttempted() {
         try {
             QuizAttemptGETResponseDTO quizAttemptGETResponseDTO = quizAttemptService.getQuizzesAttempted();
             return ResponseEntity.ok(quizAttemptGETResponseDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/attempt/{id}")
+    public ResponseEntity<QuizResultDTO> getQuizAttempt( @PathVariable Long id ) {
+        try {
+            QuizResultDTO quizResult = quizAttemptService.getQuizAttempt(id);
+            return ResponseEntity.ok(quizResult);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

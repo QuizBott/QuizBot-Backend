@@ -168,4 +168,16 @@ public class QuizAttemptService {
                 bestAttemptDTO);
     }
 
+    @Transactional
+    public QuizResultDTO getQuizAttempt(Long id){
+        Optional<QuizAttempt> quizAttempt = quizAttemptRepository.findById(id);
+
+        if (quizAttempt.isPresent()) {
+            return quizAttemptMapper.mapToQuizResultDTO(quizAttempt.get());
+        }
+
+        throw new NoSuchElementException("No attempt found");
+
+    }
+
 }
