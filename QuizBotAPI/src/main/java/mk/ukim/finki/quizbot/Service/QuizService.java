@@ -212,7 +212,7 @@ public class QuizService {
 
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<QuizRecord> response = restTemplate.postForEntity(
-                    "http://localhost:8000/generate", request, QuizRecord.class);
+                    "http://quiz-generator:8000/generate", request, QuizRecord.class);
 
             return response.getBody();
         } catch (Exception e) {

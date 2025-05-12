@@ -126,6 +126,7 @@ public class QuizAttemptService {
         List<QuizAttemptDTO> quizAttemptDTOList = quizAttempted.stream()
                 .map(quizAttempt -> new QuizAttemptDTO(
                         quizAttempt.getQuiz().getId(),
+                        quizAttempt.getId(),
                         quizAttempt.getPoints(),
                         quizAttempt.getQuiz().getMaxPoints(),
                         quizAttempt.getQuiz().getName(),
@@ -151,6 +152,7 @@ public class QuizAttemptService {
 
         QuizAttemptDTO bestAttemptDTO = highestAttemptOpt.map(bestAttempt -> new QuizAttemptDTO(
                 bestAttempt.getQuiz().getId(),
+                bestAttempt.getId(),
                 bestAttempt.getPoints(),
                 bestAttempt.getQuiz().getMaxPoints(),
                 bestAttempt.getQuiz().getName(),

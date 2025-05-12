@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record QuizAttemptDTO(
         Long id,
+        Long quizAttemptId,
         Double points,
         Double maxPoints,
         String quizName,

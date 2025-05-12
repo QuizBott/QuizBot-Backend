@@ -1,9 +1,57 @@
 version: '3.8'
 
 services:
-  quiz-generator:
+  quizbot-api:
     build: .
+    container_name: quizbot-api-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://quizbot-db:5432/quiz_bot_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET_KEY: 341dfc2e07d2988dcd6c01596a5077929929dc66ce601c75b46952dbf352f254
+    depends_on:
+      quizbot-db:
+        condition: service_healthy
+    networks:
+      - quizbot-network
+
+  quizbot-db:
+    image: postgres:latest
+    container_name: quizbot-postgres-db
+    environment:
+      POSTGRES_DB: quiz_bot_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d quiz_bot_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quizbot-network
+
+  quiz-generator:
+    build: ./scripts
+    container_name: quiz-generator
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./scripts/.env
+    networks:
+      - quizbot-network
+    depends_on:
+      quizbot-db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+
+networks:
+  quizbot-network:
+    driver: bridge
